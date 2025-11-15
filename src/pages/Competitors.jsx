@@ -1,21 +1,254 @@
+// import { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import api from '../utils/api';
+// import { toast } from 'react-toastify';
+// import { Plus, Search, ExternalLink, Edit, Trash2, Globe } from 'lucide-react';
+// import AddCompetitorModal from '../components/AddCompetitorModel';
+
+// const Competitors = () => {
+//   const [competitors, setCompetitors] = useState([]);
+//   const [filteredCompetitors, setFilteredCompetitors] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [searchQuery, setSearchQuery] = useState('');
+//   const [showModal, setShowModal] = useState(false);
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     fetchCompetitors();
+//   }, []);
+
+//   useEffect(() => {
+//     if (searchQuery) {
+//       const filtered = competitors.filter(comp =>
+//         comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+//         comp.industry?.toLowerCase().includes(searchQuery.toLowerCase())
+//       );
+//       setFilteredCompetitors(filtered);
+//     } else {
+//       setFilteredCompetitors(competitors);
+//     }
+//   }, [searchQuery, competitors]);
+
+//   const fetchCompetitors = async () => {
+//     try {
+//       setLoading(true);
+//       const response = await api.get('/competitors');
+//       setCompetitors(response.data.data);
+//       setFilteredCompetitors(response.data.data);
+//     } catch (error) {
+//       toast.error('Failed to fetch competitors');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleDelete = async (id, name) => {
+//     if (!window.confirm(`Are you sure you want to delete ${name}?`)) {
+//       return;
+//     }
+
+//     try {
+//       await api.delete(`/competitors/${id}`);
+//       toast.success('Competitor deleted successfully');
+//       fetchCompetitors();
+//     } catch (error) {
+//       toast.error('Failed to delete competitor');
+//     }
+//   };
+
+//   const getStatusColor = (status) => {
+//     const colors = {
+//       active: 'bg-green-100 text-green-800',
+//       paused: 'bg-yellow-100 text-yellow-800',
+//       archived: 'bg-gray-100 text-gray-800'
+//     };
+//     return colors[status] || colors.active;
+//   };
+
+//   const getPriorityColor = (priority) => {
+//     const colors = {
+//       high: 'bg-red-100 text-red-800',
+//       medium: 'bg-blue-100 text-blue-800',
+//       low: 'bg-gray-100 text-gray-800'
+//     };
+//     return colors[priority] || colors.medium;
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="p-8">
+//         <div className="animate-pulse space-y-4">
+//           <div className="h-12 bg-gray-200 rounded w-1/4"></div>
+//           <div className="h-64 bg-gray-200 rounded"></div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="p-8">
+//       {/* Header */}
+//       <div className="mb-8">
+//         <div className="flex items-center justify-between mb-4">
+//           <div>
+//             <h1 className="text-3xl font-bold text-gray-900">Competitors</h1>
+//             <p className="text-gray-600 mt-1">
+//               Manage and monitor your competitors
+//             </p>
+//           </div>
+//           <button
+//             onClick={() => setShowModal(true)}
+//             className="btn btn-primary flex items-center gap-2"
+//           >
+//             <Plus size={20} />
+//             Add Competitor
+//           </button>
+//         </div>
+
+//         {/* Search */}
+//         <div className="relative">
+//           <Search
+//             className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+//             size={20}
+//           />
+//           <input
+//             type="text"
+//             placeholder="Search competitors..."
+//             value={searchQuery}
+//             onChange={(e) => setSearchQuery(e.target.value)}
+//             className="input pl-10"
+//           />
+//         </div>
+//       </div>
+
+//       {/* Competitors Grid */}
+//       {filteredCompetitors.length === 0 ? (
+//         <div className="card text-center py-12">
+//           <p className="text-gray-500 mb-4">
+//             {searchQuery ? 'No competitors found' : 'No competitors added yet'}
+//           </p>
+//           {!searchQuery && (
+//             <button
+//               onClick={() => setShowModal(true)}
+//               className="btn btn-primary"
+//             >
+//               Add Your First Competitor
+//             </button>
+//           )}
+//         </div>
+//       ) : (
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//           {filteredCompetitors.map((competitor) => (
+//             <div
+//               key={competitor._id}
+//               className="card hover:shadow-md transition-shadow cursor-pointer"
+//               onClick={() => navigate(`/competitors/${competitor._id}`)}
+//             >
+//               <div className="flex items-start justify-between mb-4">
+//                 <div className="flex-1">
+//                   <h3 className="text-lg font-semibold text-gray-900 mb-1">
+//                     {competitor.name}
+//                   </h3>
+//                   {competitor.industry && (
+//                     <p className="text-sm text-gray-600">{competitor.industry}</p>
+//                   )}
+//                 </div>
+//                 <div className="flex gap-2">
+//                   <span className={`badge ${getStatusColor(competitor.status)}`}>
+//                     {competitor.status}
+//                   </span>
+//                 </div>
+//               </div>
+
+//               {competitor.description && (
+//                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+//                   {competitor.description}
+//                 </p>
+//               )}
+
+//               <div className="space-y-2 mb-4">
+//                 {competitor.website && (
+//                   <a
+//                     href={competitor.website}
+//                     target="_blank"
+//                     rel="noopener noreferrer"
+//                     onClick={(e) => e.stopPropagation()}
+//                     className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
+//                   >
+//                     <Globe size={16} />
+//                     {competitor.website.replace(/^https?:\/\//, '')}
+//                   </a>
+//                 )}
+//               </div>
+
+//               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+//                 <div className="flex items-center gap-2 text-sm">
+//                   <span className={`badge ${getPriorityColor(competitor.monitoringConfig?.priority)}`}>
+//                     {competitor.monitoringConfig?.priority || 'medium'}
+//                   </span>
+//                   <span className="text-gray-500">
+//                     {competitor.metrics?.totalUpdates || 0} updates
+//                   </span>
+//                 </div>
+
+//                 <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+//                   <button
+//                     onClick={() => navigate(`/competitors/${competitor._id}`)}
+//                     className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded"
+//                   >
+//                     <Edit size={16} />
+//                   </button>
+//                   <button
+//                     onClick={() => handleDelete(competitor._id, competitor.name)}
+//                     className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
+//                   >
+//                     <Trash2 size={16} />
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//           ))}
+//         </div>
+//       )}
+
+//       {/* Add Competitor Modal */}
+//       {showModal && (
+//         <AddCompetitorModal
+//           onClose={() => setShowModal(false)}
+//           onSuccess={() => {
+//             setShowModal(false);
+//             fetchCompetitors();
+//           }}
+//         />
+//       )}
+//     </div>
+//   );
+// };
+
+// export default Competitors;
+
+
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
-import { toast } from 'react-toastify';
-import { Plus, Search, ExternalLink, Edit, Trash2, Globe } from 'lucide-react';
+import { useCompetitors } from '../hooks/useCompetitors';
+import { Plus, Search, Globe, Edit, Trash2, TrendingUp } from 'lucide-react';
 import AddCompetitorModal from '../components/AddCompetitorModel';
+import Loading, { SkeletonCard } from '../components/Loading';
+import { ROUTES, PRIORITY_LEVELS, STATUS_TYPES } from '../utils/constants';
+import toast from 'react-hot-toast';
 
 const Competitors = () => {
-  const [competitors, setCompetitors] = useState([]);
   const [filteredCompetitors, setFilteredCompetitors] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+  
+  const { competitors, loading, fetchCompetitors, deleteCompetitor } = useCompetitors();
 
   useEffect(() => {
     fetchCompetitors();
-  }, []);
+  }, [fetchCompetitors]);
 
   useEffect(() => {
     if (searchQuery) {
@@ -29,109 +262,101 @@ const Competitors = () => {
     }
   }, [searchQuery, competitors]);
 
-  const fetchCompetitors = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get('/competitors');
-      setCompetitors(response.data.data);
-      setFilteredCompetitors(response.data.data);
-    } catch (error) {
-      toast.error('Failed to fetch competitors');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete ${name}?`)) {
       return;
     }
 
     try {
-      await api.delete(`/competitors/${id}`);
-      toast.success('Competitor deleted successfully');
+      await deleteCompetitor(id);
       fetchCompetitors();
     } catch (error) {
-      toast.error('Failed to delete competitor');
+      // Error is handled by the hook
     }
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      active: 'bg-green-100 text-green-800',
-      paused: 'bg-yellow-100 text-yellow-800',
-      archived: 'bg-gray-100 text-gray-800'
-    };
-    return colors[status] || colors.active;
+  const getPriorityClass = (priority) => {
+    return PRIORITY_LEVELS.find(p => p.value === priority)?.color || 'badge-low';
   };
 
-  const getPriorityColor = (priority) => {
-    const colors = {
-      high: 'bg-red-100 text-red-800',
-      medium: 'bg-blue-100 text-blue-800',
-      low: 'bg-gray-100 text-gray-800'
-    };
-    return colors[priority] || colors.medium;
+  const getStatusClass = (status) => {
+    return STATUS_TYPES[status] || STATUS_TYPES.active;
   };
 
-  if (loading) {
+  if (loading && competitors.length === 0) {
     return (
-      <div className="p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-64 bg-gray-200 rounded"></div>
+      <div className="p-4 sm:p-6 lg:p-8">
+        <div className="mb-8">
+          <div className="h-10 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
+          <div className="h-6 bg-gray-200 rounded w-64 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Competitors</h1>
-            <p className="text-gray-600 mt-1">
-              Manage and monitor your competitors
-            </p>
-          </div>
-          <button
-            onClick={() => setShowModal(true)}
-            className="btn btn-primary flex items-center gap-2"
-          >
-            <Plus size={20} />
-            Add Competitor
-          </button>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+            Competitors
+          </h1>
+          <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            Manage and monitor your competitors
+          </p>
         </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="btn btn-primary flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+        >
+          <Plus size={20} />
+          <span>Add Competitor</span>
+        </button>
+      </div>
 
-        {/* Search */}
+      {/* Search */}
+      <div className="card">
         <div className="relative">
           <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
             size={20}
           />
           <input
             type="text"
-            placeholder="Search competitors..."
+            placeholder="Search by name or industry..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input pl-10"
+            className="input pl-12"
           />
         </div>
       </div>
 
       {/* Competitors Grid */}
       {filteredCompetitors.length === 0 ? (
-        <div className="card text-center py-12">
-          <p className="text-gray-500 mb-4">
-            {searchQuery ? 'No competitors found' : 'No competitors added yet'}
+        <div className="card text-center py-16">
+          <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <TrendingUp className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {searchQuery ? 'No competitors found' : 'No competitors yet'}
+          </h3>
+          <p className="text-gray-600 mb-6">
+            {searchQuery 
+              ? 'Try adjusting your search terms' 
+              : 'Start by adding your first competitor to monitor'}
           </p>
           {!searchQuery && (
             <button
               onClick={() => setShowModal(true)}
-              className="btn btn-primary"
+              className="btn btn-primary inline-flex items-center gap-2"
             >
+              <Plus size={20} />
               Add Your First Competitor
             </button>
           )}
@@ -141,49 +366,51 @@ const Competitors = () => {
           {filteredCompetitors.map((competitor) => (
             <div
               key={competitor._id}
-              className="card hover:shadow-md transition-shadow cursor-pointer"
-              onClick={() => navigate(`/competitors/${competitor._id}`)}
+              className="card-hover group"
+              onClick={() => navigate(`${ROUTES.COMPETITORS}/${competitor._id}`)}
             >
+              {/* Header */}
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors truncate">
                     {competitor.name}
                   </h3>
                   {competitor.industry && (
-                    <p className="text-sm text-gray-600">{competitor.industry}</p>
+                    <p className="text-sm text-gray-600 truncate">{competitor.industry}</p>
                   )}
                 </div>
-                <div className="flex gap-2">
-                  <span className={`badge ${getStatusColor(competitor.status)}`}>
-                    {competitor.status}
-                  </span>
-                </div>
+                <span className={`badge ${getStatusClass(competitor.status)} shrink-0 ml-2`}>
+                  {competitor.status}
+                </span>
               </div>
 
+              {/* Description */}
               {competitor.description && (
                 <p className="text-sm text-gray-600 mb-4 line-clamp-2">
                   {competitor.description}
                 </p>
               )}
 
-              <div className="space-y-2 mb-4">
-                {competitor.website && (
-                  <a
-                    href={competitor.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700"
-                  >
-                    <Globe size={16} />
+              {/* Website */}
+              {competitor.website && (
+                <a
+                  href={competitor.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 mb-4 transition-colors group/link"
+                >
+                  <Globe size={16} className="shrink-0" />
+                  <span className="truncate group-hover/link:underline">
                     {competitor.website.replace(/^https?:\/\//, '')}
-                  </a>
-                )}
-              </div>
+                  </span>
+                </a>
+              )}
 
+              {/* Footer */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-2 text-sm">
-                  <span className={`badge ${getPriorityColor(competitor.monitoringConfig?.priority)}`}>
+                  <span className={`badge ${getPriorityClass(competitor.monitoringConfig?.priority)}`}>
                     {competitor.monitoringConfig?.priority || 'medium'}
                   </span>
                   <span className="text-gray-500">
@@ -191,18 +418,20 @@ const Competitors = () => {
                   </span>
                 </div>
 
-                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                   <button
-                    onClick={() => navigate(`/competitors/${competitor._id}`)}
-                    className="p-2 text-gray-600 hover:text-primary-600 hover:bg-gray-100 rounded"
+                    onClick={() => navigate(`${ROUTES.COMPETITORS}/${competitor._id}`)}
+                    className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                    title="Edit"
                   >
-                    <Edit size={16} />
+                    <Edit size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(competitor._id, competitor.name)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded"
+                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    title="Delete"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </div>
