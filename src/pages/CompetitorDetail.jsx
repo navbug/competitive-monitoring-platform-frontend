@@ -16,7 +16,6 @@ import {
   Loader2
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Loading, { SkeletonCard } from '../components/Loading';
 import { ROUTES, IMPACT_LEVELS } from '../utils/constants';
 
@@ -71,7 +70,7 @@ const CompetitorDetail = () => {
     try {
       setTriggering(true);
       await api.post(`/competitors/${id}/scrape`);
-      toast.success('Scraping triggered! Check updates in 1-2 minutes');
+      toast.success('Scraping triggered! Update in 1-2 minutes');
     } catch (error) {
       toast.error('Failed to trigger scraping');
     } finally {
@@ -169,7 +168,7 @@ const CompetitorDetail = () => {
               </>
             ) : (
               <>
-                <button 
+                {/* <button 
                   onClick={handleTriggerScrape}
                   disabled={triggering}
                   className="btn btn-primary flex items-center gap-2 disabled:opacity-50"
@@ -178,7 +177,7 @@ const CompetitorDetail = () => {
                   <span className="hidden sm:inline">
                     {triggering ? 'Scraping...' : 'Scrape Now'}
                   </span>
-                </button>
+                </button> */}
                 <button 
                   onClick={() => setEditing(true)} 
                   className="btn btn-secondary flex items-center gap-2"
@@ -229,7 +228,7 @@ const CompetitorDetail = () => {
       </div>
 
       {/* Info & Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Info Card */}
         <div className="lg:col-span-2 card">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Information</h2>
@@ -312,39 +311,6 @@ const CompetitorDetail = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Stats Chart */}
-        <div className="card">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Updates by Category</h2>
-          {stats?.byCategory && stats.byCategory.length > 0 ? (
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={stats.byCategory}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis 
-                  dataKey="_id" 
-                  angle={-45} 
-                  textAnchor="end" 
-                  height={100}
-                  style={{ fontSize: '12px' }}
-                />
-                <YAxis style={{ fontSize: '12px' }} />
-                <Tooltip 
-                  contentStyle={{
-                    backgroundColor: '#fff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                  }}
-                />
-                <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[250px] flex items-center justify-center text-gray-500">
-              No data yet
-            </div>
-          )}
         </div>
       </div>
 
